@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect} from 'react';
 import Layout from './components/Layout';
 import DashboardPage from './components/DashboardPage';
 import LeadsPage from './components/LeadsPage';
@@ -7,6 +7,8 @@ import SellerDetailPage from './components/SellerDetailPage';
 import ConfigPage from './components/ConfigPage';
 import LeadDetailModal from './components/LeadDetailModal';
 import { generateLeads, sellers as initialSellers, assignLeadsToSellers, computeAssignmentReason } from './data/mockData';
+import { fetchLeads, fetchVendors } from './services/api';
+import { normalizeLead, normalizeVendor } from './utils/normalizers';
 
 const initialData = (() => {
   const rawLeads = generateLeads(28);
@@ -19,6 +21,20 @@ function App() {
   const [sellers, setSellers] = useState(initialData.sellers);
   const [selectedLead, setSelectedLead] = useState(null);
   const [selectedSeller, setSelectedSeller] = useState(null);
+    const [leadsData, setLeadsData] = useState([]);
+  const [sellersData, setSellersData] = useState([]);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [rawLeads, rawVendors] = await Promise.all([fetchLeads(), fetchVendors()]);
+        setLeadsData(rawLeads.map(normalizeLead));
+        setSellersData(rawVendors.map(normalizeVendor));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    load();
+  }, []);
 
   const handleReassign = (leadId) => {
     setLeads(prev => {
@@ -93,17 +109,17 @@ function App() {
   const renderPage = () => {
     switch (page) {
       case 'dashboard':
-        return <DashboardPage leads={leads} sellers={sellers} onSelectLead={setSelectedLead} />;
+        return <DashboardPage leads={leadsData} sellers={sellersData} onSelectLead={setSelectedLead} />;
       case 'leads':
-        return <LeadsPage leads={leads} sellers={sellers} onSelectLead={setSelectedLead} />;
+        return <LeadsPage leads={leadsData} sellers={sellersData} onSelectLead={setSelectedLead} />;
       case 'sellers':
         return selectedSeller
           ? <SellerDetailPage seller={selectedSeller} leads={leads} onBack={() => setSelectedSeller(null)} onSelectLead={setSelectedLead} />
-          : <SellersTable sellers={sellers} leads={leads} onSelectSeller={setSelectedSeller} />;
+          : <SellersTable sellers={sellersData} leads={leadsData} onSelectSeller={setSelectedSeller} />;
       case 'config':
         return <ConfigPage />;
       default:
-        return <DashboardPage leads={leads} sellers={sellers} onSelectLead={setSelectedLead} />;
+        return <DashboardPage leads={leadsData} sellers={sellersData} onSelectLead={setSelectedLead} />;
     }
   };
 

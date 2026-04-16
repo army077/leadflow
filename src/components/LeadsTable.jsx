@@ -135,6 +135,7 @@ export default function LeadsTable({ leads, sellers, onSelectLead }) {
   };
 
   const uniqueChannels = [...new Set(leads.map(l => l.channel))];
+  const uniqueRegions = [...new Set(leads.map(l => l.region))].filter(Boolean);
 
   const selectClass = "appearance-none pl-3 pr-7 py-2 bg-white border border-ar-gray-200 rounded-lg text-xs font-medium text-ar-gray-600 focus:outline-none focus:ring-2 focus:ring-ar-steel/15 focus:border-ar-steel/30 cursor-pointer hover:border-ar-gray-300 transition-all";
 
@@ -168,9 +169,7 @@ export default function LeadsTable({ leads, sellers, onSelectLead }) {
               <select value={regionFilter} onChange={(e) => setRegionFilter(e.target.value)}
                 className="appearance-none pl-9 pr-8 py-2 bg-white border border-ar-gray-200 rounded-lg text-xs font-medium text-ar-gray-600 focus:outline-none focus:ring-2 focus:ring-ar-steel/15 cursor-pointer hover:border-ar-gray-300 transition-all">
                 <option value="all">Region</option>
-                <option value="GDL">GDL</option>
-                <option value="CDMX">CDMX</option>
-                <option value="MTY">MTY</option>
+                {uniqueRegions.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
               <ChevronDown className="absolute right-2.5 w-3 h-3 text-ar-gray-400 pointer-events-none" />
             </div>

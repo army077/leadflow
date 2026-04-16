@@ -1,4 +1,6 @@
 import LeadsTable from './LeadsTable';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 export default function LeadsPage({ leads, sellers, onSelectLead }) {
   return (
